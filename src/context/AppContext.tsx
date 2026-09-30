@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { 
   Role, 
+  Theme,
   FarmerTab, 
   StorageOwnerTab, 
   CropId, 
@@ -22,6 +23,9 @@ import {
 } from '../data/mockData';
 
 interface AppContextType {
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
+  toggleTheme: () => void;
   role: Role;
   setRole: (role: Role) => void;
   farmerTab: FarmerTab;
@@ -78,6 +82,27 @@ const STORAGE_KEY = 'kisanseva_ai_state_v2';
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Theme State - Defaults to Light Theme per user request
+  const [theme, setTheme] = useState<Theme>(() => {
+    const saved = localStorage.getItem(`${STORAGE_KEY}_theme`);
+    return (saved as Theme) || 'light';
+  });
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.add('light');
+    }
+    localStorage.setItem(`${STORAGE_KEY}_theme`, theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
+  };
+
   // Navigation State
   const [role, setRole] = useState<Role>('farmer');
   const [farmerTab, setFarmerTab] = useState<FarmerTab>('overview');
@@ -442,6 +467,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   return (
     <AppContext.Provider
       value={{
+        theme,
+        setTheme,
+        toggleTheme,
         role,
         setRole,
         farmerTab,

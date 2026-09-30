@@ -1,4 +1,5 @@
 export type Role = 'farmer' | 'storage_owner';
+export type Theme = 'light' | 'dark';
 
 export type FarmerTab = 
   | 'overview' 

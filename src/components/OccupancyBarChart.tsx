@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
+import { useApp } from '../context/AppContext';
 
 export const OccupancyBarChart: React.FC = () => {
+  const { theme } = useApp();
+  const isDark = theme === 'dark';
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   const monthsData = [
@@ -34,13 +37,17 @@ export const OccupancyBarChart: React.FC = () => {
   const activeItem = hoveredIdx !== null ? monthsData[hoveredIdx] : null;
 
   return (
-    <div className="w-full bg-slate-900/60 rounded-xl p-4 border border-slate-800/80 backdrop-blur-sm">
+    <div className={`w-full rounded-2xl p-5 border backdrop-blur-sm transition-colors ${
+      isDark 
+        ? 'bg-slate-900/70 border-slate-800' 
+        : 'bg-white border-slate-200 shadow-sm'
+    }`}>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
         <div>
-          <h4 className="text-sm font-semibold text-slate-200">
+          <h4 className={`text-sm font-bold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
             Historical & Projected Bay Occupancy
           </h4>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
             Post-harvest surge tracking across Western Maharashtra cluster
           </p>
         </div>
@@ -48,11 +55,15 @@ export const OccupancyBarChart: React.FC = () => {
         <div className="flex items-center gap-4 text-xs">
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded bg-cyan-500" />
-            <span className="text-slate-300">Historical Actual</span>
+            <span className={isDark ? 'text-slate-300' : 'text-slate-700 font-semibold'}>
+              Historical Actual
+            </span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded bg-indigo-500/60 border border-indigo-400/80 border-dashed" />
-            <span className="text-slate-400">Projected Peak</span>
+            <span className={isDark ? 'text-slate-400' : 'text-slate-500'}>
+              Projected Peak
+            </span>
           </div>
         </div>
       </div>
@@ -78,13 +89,13 @@ export const OccupancyBarChart: React.FC = () => {
                 y1={getY(val)}
                 x2={width - padding.right}
                 y2={getY(val)}
-                stroke="rgba(255, 255, 255, 0.06)"
+                stroke={isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)'}
               />
               <text
                 x={padding.left - 8}
                 y={getY(val) + 4}
                 textAnchor="end"
-                className="text-[10px] fill-slate-500 font-mono"
+                className={`text-[10px] font-mono ${isDark ? 'fill-slate-500' : 'fill-slate-500'}`}
               >
                 {val}%
               </text>
@@ -98,7 +109,7 @@ export const OccupancyBarChart: React.FC = () => {
             x2={width - padding.right}
             y2={getY(80)}
             stroke="#10b981"
-            strokeOpacity="0.5"
+            strokeOpacity="0.6"
             strokeWidth="1.5"
             strokeDasharray="4 4"
           />
@@ -106,7 +117,7 @@ export const OccupancyBarChart: React.FC = () => {
             x={width - padding.right}
             y={getY(80) - 5}
             textAnchor="end"
-            className="text-[9px] fill-emerald-400 font-mono uppercase"
+            className="text-[9px] fill-emerald-600 dark:fill-emerald-400 font-mono font-bold uppercase"
           >
             Target (80%)
           </text>
@@ -125,13 +136,12 @@ export const OccupancyBarChart: React.FC = () => {
                 onMouseEnter={() => setHoveredIdx(i)}
                 onMouseLeave={() => setHoveredIdx(null)}
               >
-                {/* Bar Body */}
                 <rect
                   x={x}
                   y={y}
                   width={barWidth}
                   height={barH}
-                  rx="4"
+                  rx="6"
                   fill={d.projected ? 'url(#projectedGrad)' : 'url(#actualGrad)'}
                   stroke={d.projected ? '#818cf8' : '#22d3ee'}
                   strokeWidth={isHovered ? '2' : '1'}
@@ -140,22 +150,28 @@ export const OccupancyBarChart: React.FC = () => {
                   opacity={hoveredIdx !== null && !isHovered ? 0.6 : 1}
                 />
 
-                {/* Percentage label on top */}
                 <text
                   x={x + barWidth / 2}
                   y={y - 6}
                   textAnchor="middle"
-                  className={`text-[10px] font-mono font-semibold ${isHovered ? 'fill-white' : 'fill-slate-400'}`}
+                  className={`text-[10px] font-mono font-bold ${
+                    isHovered
+                      ? isDark ? 'fill-white' : 'fill-slate-900'
+                      : isDark ? 'fill-slate-400' : 'fill-slate-600'
+                  }`}
                 >
                   {d.occupancy}%
                 </text>
 
-                {/* Month label at bottom */}
                 <text
                   x={x + barWidth / 2}
                   y={height - padding.bottom + 16}
                   textAnchor="middle"
-                  className={`text-[10px] font-medium ${isHovered ? 'fill-cyan-400 font-bold' : 'fill-slate-400'}`}
+                  className={`text-[10px] font-semibold ${
+                    isHovered
+                      ? 'fill-cyan-600 dark:fill-cyan-400 font-bold'
+                      : isDark ? 'fill-slate-400' : 'fill-slate-600'
+                  }`}
                 >
                   {d.month}
                 </text>
@@ -166,19 +182,21 @@ export const OccupancyBarChart: React.FC = () => {
       </div>
 
       {/* Hover Info */}
-      <div className="mt-2 pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono">
-        <span className="text-slate-400">
+      <div className={`mt-2 pt-2 border-t flex items-center justify-between text-xs font-mono ${
+        isDark ? 'border-slate-800 text-slate-400' : 'border-slate-200 text-slate-600'
+      }`}>
+        <span>
           {activeItem ? (
             <>
-              Selected: <strong className="text-cyan-400">{activeItem.month}</strong> • Occupancy:{' '}
-              <strong className="text-white">{activeItem.occupancy}%</strong> • Revenue:{' '}
-              <strong className="text-emerald-400">{activeItem.revenue}</strong>
+              Selected: <strong className="text-cyan-600 dark:text-cyan-400">{activeItem.month}</strong> • Occupancy:{' '}
+              <strong className={isDark ? 'text-white' : 'text-slate-900'}>{activeItem.occupancy}%</strong> • Revenue:{' '}
+              <strong className="text-emerald-600 dark:text-emerald-400">{activeItem.revenue}</strong>
             </>
           ) : (
             'Hover over any month to view facility utilization & revenue breakdown'
           )}
         </span>
-        <span className="text-slate-500 text-[11px]">Facility Max: 1,500 Quintals</span>
+        <span className="text-[11px] text-slate-500">Facility Max: 1,500 Quintals</span>
       </div>
     </div>
   );
